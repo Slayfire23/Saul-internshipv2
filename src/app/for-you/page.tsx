@@ -1,47 +1,37 @@
-"use client";
+import ForYouClient from "./ForYouClient";
+import { getBooksByStatus } from "@/lib/books";
+import { Book } from "@/types/book";
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+export const dynamic = "force-dynamic";
 
-export default function ForYouPage() {
-  const [userLabel, setUserLabel] = useState("");
+export default async function ForYouPage() {
+  let selectedBook: Book | null = null;
+  let recommendedBooks: Book[] = [];
+  let suggestedBooks: Book[] = [];
+  let error = "";
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUserLabel(user?.email || (user ? "Guest user" : ""));
-    });
+  try {
+    const [selectedResponse, recommendedResponse, suggestedResponse] = await Promise.all([
+      getBooksByStatus("selected") as Promise<Book | Book[]>,
+      getBooksByStatus("recommended") as Promise<Book[]>,
+      getBooksByStatus("suggested") as Promise<Book[]>,
+    ]);
 
-    return unsubscribe;
-  }, []);
-
-  async function handleLogout() {
-    await signOut(auth);
+    selectedBook = Array.isArray(selectedResponse)
+      ? selectedResponse[0] ?? null
+      : selectedResponse;
+    recommendedBooks = recommendedResponse;
+    suggestedBooks = suggestedResponse;
+  } catch {
+    error = "We could not load your books right now. Please try again.";
   }
 
   return (
-    <main className="for-you">
-      <div className="for-you__content">
-        <Link className="for-you__logo" href="/">
-          Summarist
-        </Link>
-        <h1 className="for-you__title">For You</h1>
-        <p className="for-you__subtitle">
-          {userLabel
-            ? `You are logged in as ${userLabel}.`
-            : "You are currently logged out."}
-        </p>
-        {userLabel ? (
-          <button className="btn for-you__button" onClick={handleLogout}>
-            Logout
-          </button>
-        ) : (
-          <Link className="btn for-you__button" href="/">
-            Back to login
-          </Link>
-        )}
-      </div>
-    </main>
+    <ForYouClient
+      selectedBook={selectedBook}
+      recommendedBooks={recommendedBooks}
+      suggestedBooks={suggestedBooks}
+      error={error}
+    />
   );
 }

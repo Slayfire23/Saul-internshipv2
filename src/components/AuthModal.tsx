@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { FiUser, FiX } from "react-icons/fi";
 import {
   createUserWithEmailAndPassword,
@@ -13,7 +14,7 @@ import {
 } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 
-const SUCCESS_REDIRECT_URL = "https://summarist.vercel.app/for-you";
+const SUCCESS_REDIRECT_URL = "/for-you";
 
 export type AuthMode = "login" | "register" | "forgot";
 
@@ -22,6 +23,7 @@ type AuthModalProps = {
   mode: AuthMode;
   onClose: () => void;
   onModeChange: (mode: AuthMode) => void;
+  successRedirectUrl?: string | null;
 };
 
 const authContent = {
@@ -44,7 +46,9 @@ export default function AuthModal({
   mode,
   onClose,
   onModeChange,
+  successRedirectUrl = SUCCESS_REDIRECT_URL,
 }: AuthModalProps) {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -85,7 +89,9 @@ export default function AuthModal({
       setEmail("");
       setPassword("");
       onClose();
-      window.location.href = SUCCESS_REDIRECT_URL;
+      if (successRedirectUrl) {
+        router.push(successRedirectUrl);
+      }
     } catch (error) {
       setMessage(getAuthErrorMessage(error));
     } finally {
@@ -100,7 +106,9 @@ export default function AuthModal({
     try {
       await signInAnonymously(auth);
       onClose();
-      window.location.href = SUCCESS_REDIRECT_URL;
+      if (successRedirectUrl) {
+        router.push(successRedirectUrl);
+      }
     } catch (error) {
       setMessage(getAuthErrorMessage(error));
     } finally {
@@ -116,7 +124,9 @@ export default function AuthModal({
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
       onClose();
-      window.location.href = SUCCESS_REDIRECT_URL;
+      if (successRedirectUrl) {
+        router.push(successRedirectUrl);
+      }
     } catch (error) {
       setMessage(getAuthErrorMessage(error));
     } finally {

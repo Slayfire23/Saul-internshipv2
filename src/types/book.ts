@@ -7,7 +7,7 @@ export type Book = {
   audioLink: string;
   totalRating: number;
   averageRating: number;
-  keyIdeas: string[];
+  keyIdeas: number | string[];
   type: string;
   status: "selected" | "recommended" | "suggested";
   subscriptionRequired: boolean;

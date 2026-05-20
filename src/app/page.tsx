@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
   AiFillAudio,
@@ -97,6 +98,7 @@ const footerGroups = [
 ];
 
 export default function Home() {
+  const router = useRouter();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<AuthMode>("login");
   const [userLabel, setUserLabel] = useState("");
@@ -117,6 +119,15 @@ export default function Home() {
   function openAuthModal(mode: AuthMode) {
     setAuthMode(mode);
     setIsAuthModalOpen(true);
+  }
+
+  function handlePrimaryAction() {
+    if (userLabel) {
+      router.push("/for-you");
+      return;
+    }
+
+    openAuthModal("login");
   }
 
   async function handleLogout() {
@@ -183,7 +194,7 @@ export default function Home() {
                   </p>
                   <button
                     className="btn home__cta--btn"
-                    onClick={() => openAuthModal("login")}
+                    onClick={handlePrimaryAction}
                     type="button"
                   >
                     {userLabel ? "Continue reading" : "Login"}
@@ -327,7 +338,7 @@ export default function Home() {
               <div className="reviews__btn--wrapper">
                 <button
                   className="btn home__cta--btn"
-                  onClick={() => openAuthModal("login")}
+                  onClick={handlePrimaryAction}
                   type="button"
                 >
                   {userLabel ? "Continue reading" : "Login"}
